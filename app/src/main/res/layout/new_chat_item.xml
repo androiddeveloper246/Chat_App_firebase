@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    android:id="@+id/card_view"
+    android:clickable="true"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_margin="5dp">
+
+    <TextView
+        android:id="@+id/new_user_chat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="new User Chat Now"
+        android:padding="10dp" />
+
+</androidx.cardview.widget.CardView>
