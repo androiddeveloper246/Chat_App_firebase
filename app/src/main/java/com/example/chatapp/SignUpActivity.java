@@ -3,6 +3,7 @@ package com.example.chatapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,12 +27,11 @@ import com.google.firebase.database.FirebaseDatabase;
 public class SignUpActivity extends AppCompatActivity {
 
     public final static String DATABASE__USER_TOKENS = "user_tokens";
-    SignInButton signInButton;
-    FirebaseAuth mAuth;
-    GoogleSignInClient googleSignInClient;
-    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    DatabaseReference databaseReference = firebaseDatabase.getReference(DATABASE__USER_TOKENS);
-    int REQ_CODE = 1;
+    private FirebaseAuth mAuth;
+    private GoogleSignInClient googleSignInClient;
+    private DatabaseReference databaseReference;
+
+    private final int REQ_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +39,8 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
 
         mAuth = FirebaseAuth.getInstance();
-
-        signInButton = findViewById(R.id.sign_up_with_email);
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference(DATABASE__USER_TOKENS);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.token))
@@ -49,33 +49,26 @@ public class SignUpActivity extends AppCompatActivity {
 
         googleSignInClient = GoogleSignIn.getClient(this,gso);
 
+        SignInButton signInButton = findViewById(R.id.sign_up_with_email);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent intent = googleSignInClient.getSignInIntent();
                 startActivityForResult(intent,REQ_CODE);
             }
         });
-
-
-
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == REQ_CODE) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account.getIdToken());
-
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
             }
         }}
 
@@ -86,16 +79,15 @@ public class SignUpActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 databaseReference.push().setValue(user.getUid());
                                 Intent intent = new Intent(SignUpActivity.this,ChatActivity.class);
                                 startActivity(intent);
+                                finish();
                             } else {
-                                // If sign in fails, display a message to the user.
+                                Toast.makeText(SignUpActivity.this, "Sign up Failed", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
         }
-
 }
